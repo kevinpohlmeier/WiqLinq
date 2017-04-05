@@ -1,146 +1,86 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
-using System.Net;
 using Apr.TeamFoundation.Tracking.Linq;
 using System.Linq.Expressions;
-using System.Diagnostics;
+using Apr.TeamFoundation.Tracking.WiqLinq.Tests.CollectionFixtures;
+using Xunit;
 
 namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 {
-	/// <summary>
-	/// Summary description for WiqlPartsTest
-	/// </summary>
-	[TestClass]
-	public class WiqlPartsTest
+    [Collection(TestCollectionType.Standard)]
+    public class WiqlPartsTest
 	{
-		const string TFS_SERVER = "http://test-app:8080";
-
 		const string MINIMAL_WIQL = "SELECT [System.Id] FROM WORKITEMS";
         
-        private static TfsTeamProjectCollection server;
-
-		private WorkItemStore store;
-
-		private TestContext testContextInstance;
-
-		/// <summary>
-		///Gets or sets the test context which provides
-		///information about and functionality for the current test run.
-		///</summary>
-		public TestContext TestContext
-		{
-			get
-			{
-				return testContextInstance;
-			}
-			set
-			{
-				testContextInstance = value;
-			}
-		}
-
-		#region Additional test attributes
-		// 
-		//You can use the following additional attributes as you write your tests:
-		//
-		//Use ClassInitialize to run code before running the first test in the class
-		[ClassInitialize(), DebuggerStepThrough]
-		public static void MyClassInitialize(TestContext testContext)
-		{
-		    server = new TfsTeamProjectCollection(new Uri(TFS_SERVER));
-            server.Authenticate();
-
-			if (!server.HasAuthenticated)
-				throw new InvalidOperationException("Not authenticated");
-		}
-		[DebuggerStepThrough]
-		public WiqlPartsTest()
-		{
-			store = new WorkItemStore(server);
-		}
-
-		//Use ClassCleanup to run code after all tests in a class have run
-		//[ClassCleanup()]
-		public static void MyClassCleanup()
-		{
-			server.Dispose();
-			server = null;
-		}
-		// Use TestInitialize to run code before running each test 
-		// [TestInitialize()]
-		// public void MyTestInitialize() { }
-		//
-		// Use TestCleanup to run code after each test has run
-		// [TestCleanup()]
-		// public void MyTestCleanup() { }
-		//
-		#endregion
-
+		private readonly WorkItemStore _store;
+        
+        public WiqlPartsTest(StandardFixture fixture)
+	    {
+            _store = fixture.WorkItemStore;
+	    }
+        
 		private static string TrimQueryText(IQueryable<WorkItem> actual)
 		{
 			string actualWiql = string.Join(" ", actual.ToString().Split(new string[] { Environment.NewLine, " " }, StringSplitOptions.RemoveEmptyEntries).ToArray());
 			return actualWiql;
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WiqlBasicTest()
 		{
-			var actual = store.WorkItems();
+			var actual = _store.WorkItems();
 
 			string actualWiql = TrimQueryText(actual);
 			string expectedWiql = MINIMAL_WIQL;
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WiqlAsofTest()
 		{
 			DateTime asof = DateTime.MinValue; // TODO: Initialize to an appropriate value
 
-			var actual = store.WorkItems(asof);
+			var actual = _store.WorkItems(asof);
 
 			string actualWiql = TrimQueryText(actual);
 			string expectedWiql = MINIMAL_WIQL + " ASOF 1/1/0001 12:00:00 AM";
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
 
-		[TestMethod]
+		[Fact]
 		public void LinqExprSimpleTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							select item;
 
 			string actualWiql = TrimQueryText(query);
 			string expectedWiql = MINIMAL_WIQL;
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void LinqExprWhereFieldsCollectionKeyEqlConstantTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Fields[CoreFieldReferenceNames.WorkItemType].Value == "Bug"
 							select item;
 
 			string actualWiql = TrimQueryText(query);
 			string expectedWiql = MINIMAL_WIQL + " WHERE ([System.WorkItemType] = 'Bug')";
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void LinqExprWhereORTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where
 								item.Fields[CoreFieldReferenceNames.WorkItemType].Value == "Bug" ||
 								item.Fields[CoreFieldReferenceNames.WorkItemType].Value == "Change Request"
@@ -149,13 +89,13 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 			string actualWiql = TrimQueryText(query);
 			string expectedWiql = MINIMAL_WIQL + " WHERE (([System.WorkItemType] = 'Bug') OR ([System.WorkItemType] = 'Change Request'))";
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void LinqExprWhereIntPropertyAccessTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where
 								item.Id == 12000
 							select item;
@@ -163,10 +103,10 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 			string actualWiql = TrimQueryText(query);
 			string expectedWiql = MINIMAL_WIQL + " WHERE ([System.Id] = 12000)";
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WiqlEveryPartTest()
 		{
 			/*
@@ -192,45 +132,45 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 			string expectedADF = MINIMAL_WIQL + expectedOrderPartAsc + expectedDatePart;
 			string expectedBDF = MINIMAL_WIQL + expectedWherePart + expectedOrderPartDesc + expectedDatePart;
 
-			var queryACE = from item in store.WorkItems()
+			var queryACE = from item in _store.WorkItems()
 								select item;
-			var queryBCE = from item in store.WorkItems()
+			var queryBCE = from item in _store.WorkItems()
 								where item.Id == 12000
 								select item;
-			var queryADE = from item in store.WorkItems()
+			var queryADE = from item in _store.WorkItems()
 								orderby item.Title ascending
 								select item;
-			var queryBDE = from item in store.WorkItems()
+			var queryBDE = from item in _store.WorkItems()
 								where item.Id == 12000
 								orderby item.Title descending
 								select item;
-			var queryACF = from item in store.WorkItems(dateTimeConditions)
+			var queryACF = from item in _store.WorkItems(dateTimeConditions)
 								select item;
-			var queryBCF = from item in store.WorkItems(dateTimeConditions)
+			var queryBCF = from item in _store.WorkItems(dateTimeConditions)
 								where item.Id == 12000
 								select item;
-			var queryADF = from item in store.WorkItems(dateTimeConditions)
+			var queryADF = from item in _store.WorkItems(dateTimeConditions)
 								orderby item.Title ascending
 								select item;
-			var queryBDF = from item in store.WorkItems(dateTimeConditions)
+			var queryBDF = from item in _store.WorkItems(dateTimeConditions)
 								where item.Id == 12000
 								orderby item.Title descending
 								select item;
 
-			Assert.AreEqual<string>(expectedACE, TrimQueryText(queryACE));
-			Assert.AreEqual<string>(expectedBCE, TrimQueryText(queryBCE));
-			Assert.AreEqual<string>(expectedADE, TrimQueryText(queryADE));
-			Assert.AreEqual<string>(expectedBDE, TrimQueryText(queryBDE));
-			Assert.AreEqual<string>(expectedACF, TrimQueryText(queryACF));
-			Assert.AreEqual<string>(expectedBCF, TrimQueryText(queryBCF));
-			Assert.AreEqual<string>(expectedADF, TrimQueryText(queryADF));
-			Assert.AreEqual<string>(expectedBDF, TrimQueryText(queryBDF));
+			Assert.Equal(expectedACE, TrimQueryText(queryACE));
+			Assert.Equal(expectedBCE, TrimQueryText(queryBCE));
+			Assert.Equal(expectedADE, TrimQueryText(queryADE));
+			Assert.Equal(expectedBDE, TrimQueryText(queryBDE));
+			Assert.Equal(expectedACF, TrimQueryText(queryACF));
+			Assert.Equal(expectedBCF, TrimQueryText(queryBCF));
+			Assert.Equal(expectedADF, TrimQueryText(queryADF));
+			Assert.Equal(expectedBDF, TrimQueryText(queryBDF));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void ProviderMultiplicationTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							//where item.Id == 12000
 							select item;
 
@@ -245,24 +185,24 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 			string expectedWherePart3 = " WHERE ([System.Title] = 'test')";
 
 
-			Assert.AreEqual<string>(MINIMAL_WIQL + expectedWherePart2, TrimQueryText(queryWithWhere));
-			Assert.AreEqual<string>(MINIMAL_WIQL, TrimQueryText(query));
-			Assert.AreEqual<string>(MINIMAL_WIQL + expectedWherePart3, TrimQueryText(queryWithStandaloneWhere));
+			Assert.Equal(MINIMAL_WIQL + expectedWherePart2, TrimQueryText(queryWithWhere));
+			Assert.Equal(MINIMAL_WIQL, TrimQueryText(query));
+			Assert.Equal(MINIMAL_WIQL + expectedWherePart3, TrimQueryText(queryWithStandaloneWhere));
 		}
 
 
-		[TestMethod]
+		[Fact]
 		public void WhereClauseANDTest()
 		{
 			string expected = MINIMAL_WIQL + " WHERE (([System.AssignedTo] = 'Andrew Revinsky') AND ([System.Title] CONTAINS 'error'))";
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.AssignedTo) == "Andrew Revinsky" &&
 								item.Field(CoreFieldReferenceNames.Title).Contains("error")
 							select item;
 			string actual = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expected, actual);
+			Assert.Equal(expected, actual);
 			/*
 				SELECT [System.Id], [System.Title] 
 				FROM WorkItems 
@@ -271,7 +211,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 			 */
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WhereClauseEVERTest()
 		{
 			/*
@@ -283,47 +223,47 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 			string expected = MINIMAL_WIQL + " WHERE ([System.AssignedTo] EVER 'Andrew Revinsky')";
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.AssignedTo).Ever("Andrew Revinsky")
 							select item;
 			string actual = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expected, actual);
+			Assert.Equal(expected, actual);
 
 
 			string expected2 = MINIMAL_WIQL + " WHERE ([System.AssignedTo] NOT EVER 'Andrew Revinsky')";
 
-			var query2 = from item in store.WorkItems()
+			var query2 = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.AssignedTo).NotEver("Andrew Revinsky")
 							select item;
 			string actual2 = TrimQueryText(query2);
 
-			Assert.AreEqual<string>(expected2, actual2);
+			Assert.Equal(expected2, actual2);
 
 			
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WhereClauseUNDERTest()
 		{
 			string expected = MINIMAL_WIQL + " WHERE ([System.AreaPath] UNDER 'CorpTools')";
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.AreaPath).Under("CorpTools")
 							select item;
 			string actual = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expected, actual);
+			Assert.Equal(expected, actual);
 
 
 			string expected2 = MINIMAL_WIQL + " WHERE ([System.AreaPath] NOT UNDER 'CorpTools')";
 
-			var query2 = from item in store.WorkItems()
+			var query2 = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.AreaPath).NotUnder("CorpTools")
 							select item;
 			string actual2 = TrimQueryText(query2);
 
-			Assert.AreEqual<string>(expected2, actual2);
+			Assert.Equal(expected2, actual2);
 
 /*
 	SELECT [System.Id], [System.Title] 
@@ -338,7 +278,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 // WHERE [System.TeamProject] = 'CorpTools' 
 // AND [System.AssignedTo] EVER 'David Galvin'
 // AND [System.AreaPath] UNDER 'Agile1\Area 0'";
-//         var query3 = from item in store.WorkItems()
+//         var query3 = from item in _store.WorkItems()
 //                      where item.Field(CoreFieldReferenceNames.TeamProject) == "CorpTools" &&
 //                        item.Field(CoreFieldReferenceNames.AssignedTo).Ever("David Galvin") &&
 //                        item.Field(CoreFieldReferenceNames.AreaPath).Under("")
@@ -346,68 +286,68 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 		}
 
-		[TestMethod]
+		[Fact]
 		public void WhereClauseINTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.Id).In(12000, 13000, 14000)
 							//where item.Field( .In(CoreFieldReferenceNames.Id, new int[] { 12000, 13000, 14000 })
 							select item;
 		}
 
-		[TestMethod]
+		[Fact]
 		public void FieldOperatorTest()
 		{
 			string expected = MINIMAL_WIQL + " WHERE ([System.Id] IN (12000, 12001, 12002))";
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field(CoreFieldReferenceNames.Id).In(12000, 12001, 12002)
 							select item;
 			string actual = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expected, actual);
+			Assert.Equal(expected, actual);
 
-			var query2 = from item in store.WorkItems()
+			var query2 = from item in _store.WorkItems()
 							 where item.Field<int>(CoreFieldReferenceNames.Id).In(12000, 12001, 12002)
 							 select item;
 			string actual2 = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expected, actual2);
+			Assert.Equal(expected, actual2);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void SeveralSelectsTest()
 		{
 			string expected = MINIMAL_WIQL;
 			string expected2 = MINIMAL_WIQL.Replace("[System.Id]", "[System.Id], [System.Title]");
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							select item;
 
 			var query2 = query.Select(item => item.Columns());
 			string actual2 = TrimQueryText(query2);
-			Assert.AreEqual<string>(expected, actual2);
+			Assert.Equal(expected, actual2);
 
 
 			var query3 = query.Select(item => item.Columns("System.Id", CoreFieldReferenceNames.Title));
 			string actual3 = TrimQueryText(query3);
 
 
-			Assert.AreEqual<string>(expected, actual2);
-			Assert.AreEqual<string>(expected2, actual3);
+			Assert.Equal(expected, actual2);
+			Assert.Equal(expected2, actual3);
 
 			var query4 = query3.Where(item => item.Field<int>(CoreFieldReferenceNames.Id) == 12345);
 
 			WorkItemCollection result = query4.Provider.Execute<WorkItemCollection>(query4.Expression);
 			int displayFields3 = result.DisplayFields.Count;
 
-			Assert.AreEqual<int>(2, displayFields3);
+			Assert.Equal(2, displayFields3);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void QueryExecutionTest()
 		{
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where item.Field<int>(CoreFieldReferenceNames.Id) > 33000 &&
 								item.Field<string>(CoreFieldReferenceNames.Title).Contains("test")
 							select item.Columns(
@@ -417,11 +357,11 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 								CoreFieldReferenceNames.AssignedTo);
 			var result = ((IQueryableWorkitemStore)query).Execute();
 
-			Assert.AreEqual<int>(4, result.DisplayFields.Count);
-			Assert.IsTrue(result.Count > 0);
+			Assert.Equal(4, result.DisplayFields.Count);
+			Assert.True(result.Count > 0);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void ArbitraryColumnsTest()
 		{
 			List<string> columns = new List<string>()
@@ -440,7 +380,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 				{ "assignedever", item => item.Field<string>(CoreFieldReferenceNames.AssignedTo).Ever("Andrew Revinsky") }
 			};
 
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							select item;
 
 			var cols = (from int i in (new int[] { 0, 2, 4 })
@@ -456,11 +396,11 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 			var result = ((IQueryableWorkitemStore)query).Execute();
 
-			Assert.IsTrue(result.Count > 0);
-			Assert.AreEqual<int>(columns.Count, result.DisplayFields.Count);
+			Assert.True(result.Count > 0);
+			Assert.Equal(columns.Count, result.DisplayFields.Count);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void FieldRecognitionTest()
 		{
 			string[] clauses = new string[] {
@@ -481,7 +421,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 			string expectedWiql = MINIMAL_WIQL + string.Format(" WHERE ({0})", current);
 			
-			var query = from item in store.WorkItems()
+			var query = from item in _store.WorkItems()
 							where
 								item.Id > 33000 &&
 								item.Title.Contains("error") &&
@@ -492,15 +432,8 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 			string actualWiql = TrimQueryText(query);
 
-			Assert.AreEqual<string>(expectedWiql, actualWiql);
+			Assert.Equal(expectedWiql, actualWiql);
 		}
-
-		/*
-		[TestMethod]
-		public void UnitTest()
-		{
-		}
-		*/
-
+        
 	}
 }
