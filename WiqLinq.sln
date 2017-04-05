@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.12
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apr.TeamFoundation.Tracking.Core", "Apr.TeamFoundation.Tracking.Core\Apr.TeamFoundation.Tracking.Core.csproj", "{394F19B6-7E28-4060-87D3-B1D472D361D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apr.TeamFoundation.Tracking.WiqLinq", "Apr.TeamFoundation.Tracking.WiqLinq\Apr.TeamFoundation.Tracking.WiqLinq.csproj", "{5C021AB2-1F12-40D4-9C92-54D8E91E2FEF}"
@@ -8,21 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apr.TeamFoundation.Tracking.WiqLinq.Tests", "Apr.TeamFoundation.Tracking.WiqLinq.Tests\Apr.TeamFoundation.Tracking.WiqLinq.Tests.csproj", "{415F33D6-F96F-4203-8583-E878A1013735}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs09.codeplex.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Apr.TeamFoundation.Tracking.Core\\Apr.TeamFoundation.Tracking.Core.csproj
-		SccProjectName1 = Apr.TeamFoundation.Tracking.Core
-		SccLocalPath1 = Apr.TeamFoundation.Tracking.Core
-		SccProjectUniqueName2 = Apr.TeamFoundation.Tracking.WiqLinq\\Apr.TeamFoundation.Tracking.WiqLinq.csproj
-		SccProjectName2 = Apr.TeamFoundation.Tracking.WiqLinq
-		SccLocalPath2 = Apr.TeamFoundation.Tracking.WiqLinq
-		SccProjectUniqueName3 = Apr.TeamFoundation.Tracking.WiqLinq.Tests\\Apr.TeamFoundation.Tracking.WiqLinq.Tests.csproj
-		SccProjectName3 = Apr.TeamFoundation.Tracking.WiqLinq.Tests
-		SccLocalPath3 = Apr.TeamFoundation.Tracking.WiqLinq.Tests
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

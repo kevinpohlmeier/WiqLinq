@@ -21,7 +21,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 
 		private TestContext testContextInstance;
 
-		private static TeamFoundationServer server;
+		private static TfsTeamProjectCollection server;
 
 		private WorkItemStore workItemStore;
 
@@ -51,7 +51,7 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 		[ClassInitialize()]
 		public static void MyClassInitialize(TestContext testContext)
 		{
-			server = new TeamFoundationServer(TFS_SERVER, CredentialCache.DefaultNetworkCredentials);
+			server = new TfsTeamProjectCollection(new Uri(TFS_SERVER));
 			server.Authenticate();
 
 			if (!server.HasAuthenticated)

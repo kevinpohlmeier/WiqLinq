@@ -21,8 +21,8 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 		const string TFS_SERVER = "http://test-app:8080";
 
 		const string MINIMAL_WIQL = "SELECT [System.Id] FROM WORKITEMS";
-
-		private static TeamFoundationServer server;
+        
+        private static TfsTeamProjectCollection server;
 
 		private WorkItemStore store;
 
@@ -52,8 +52,8 @@ namespace Apr.TeamFoundation.Tracking.WiqLinq.Tests
 		[ClassInitialize(), DebuggerStepThrough]
 		public static void MyClassInitialize(TestContext testContext)
 		{
-			server = new TeamFoundationServer(TFS_SERVER, CredentialCache.DefaultNetworkCredentials);
-			server.Authenticate();
+		    server = new TfsTeamProjectCollection(new Uri(TFS_SERVER));
+            server.Authenticate();
 
 			if (!server.HasAuthenticated)
 				throw new InvalidOperationException("Not authenticated");

@@ -17,12 +17,12 @@ namespace Apr.TeamFoundation.Tracking.Linq
 		{
 			return new QueryableWorkItemStore(new WorkItemQueryProvider(store) { AsOf = asof });
 		}
-		public static IQueryableWorkitemStore WorkItems(this TFS.TeamFoundationServer server)
+		public static IQueryableWorkitemStore WorkItems(this TFS.TfsTeamProjectCollection server)
 		{
 			WIT.WorkItemStore store = new WIT.WorkItemStore(server);
 			return new QueryableWorkItemStore(new WorkItemQueryProvider(store));
 		}
-		public static IQueryableWorkitemStore WorkItems(this TFS.TeamFoundationServer server, DateTime asof)
+		public static IQueryableWorkitemStore WorkItems(this TFS.TfsTeamProjectCollection server, DateTime asof)
 		{
 			WIT.WorkItemStore store = new WIT.WorkItemStore(server);
 			return new QueryableWorkItemStore(new WorkItemQueryProvider(store) { AsOf = asof });
